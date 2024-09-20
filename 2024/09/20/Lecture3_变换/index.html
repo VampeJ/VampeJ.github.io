@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="$2$ 维坐标的线性变换缩放 $$ \begin{matrix}     \left[     \begin{array}\\     x^{\prime}\\     y^{\prime}\\     \end{array}     \right] \end{matrix}  &#x3D;  \begin{matrix}     \left[     \begin{array}\\     s_x&amp;0\\">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lecture3 :变换（2维坐标）">
+<meta property="og:url" content="http://example.com/2024/09/20/Lecture3_%E5%8F%98%E6%8D%A2/index.html">
+<meta property="og:site_name" content="Vampire">
+<meta property="og:description" content="$2$ 维坐标的线性变换缩放 $$ \begin{matrix}     \left[     \begin{array}\\     x^{\prime}\\     y^{\prime}\\     \end{array}     \right] \end{matrix}  &#x3D;  \begin{matrix}     \left[     \begin{array}\\     s_x&amp;0\\">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20224801.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20225624.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20230024.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20230519.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232159.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232407.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232634.png">
+<meta property="article:published_time" content="2024-09-20T15:28:15.000Z">
+<meta property="article:modified_time" content="2024-09-20T15:50:25.104Z">
+<meta property="article:author" content="Vampire">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="CG">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20224801.png">
+
+<link rel="canonical" href="http://example.com/2024/09/20/Lecture3_%E5%8F%98%E6%8D%A2/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lecture3 :变换（2维坐标） | Vampire</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Vampire</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/20/Lecture3_%E5%8F%98%E6%8D%A2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vampire">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vampire">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lecture3 :变换（2维坐标）
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-09-20 23:28:15 / 修改时间：23:50:25" itemprop="dateCreated datePublished" datetime="2024-09-20T23:28:15+08:00">2024-09-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" itemprop="url" rel="index"><span itemprop="name">学习笔记</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="2-维坐标的线性变换"><a href="#2-维坐标的线性变换" class="headerlink" title="$2$ 维坐标的线性变换"></a>$2$ 维坐标的线性变换</h2><h3 id="缩放"><a href="#缩放" class="headerlink" title="缩放"></a>缩放</h3><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20224801.png" style="zoom:50%;" />
+$$
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x^{\prime}\\
+    y^{\prime}\\
+    \end{array}
+    \right]
+\end{matrix} 
+= 
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    s_x&0\\
+    0&s_y\\
+    \end{array}
+    \right]
+\end{matrix} 
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x\\
+    y\\
+    \end{array}
+    \right]
+\end{matrix}
+$$
+
+<span id="more"></span>
+
+<h3 id="对称"><a href="#对称" class="headerlink" title="对称"></a>对称</h3><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20225624.png" style="zoom:50%;" />
+$$
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x^{\prime}\\
+    y^{\prime}\\
+    \end{array}
+    \right]
+\end{matrix} 
+= 
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    -1&0\\
+    0&1\\
+    \end{array}
+    \right]
+\end{matrix} 
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x\\
+    y\\
+    \end{array}
+    \right]
+\end{matrix}
+$$
+
+<h3 id="切变"><a href="#切变" class="headerlink" title="切变"></a>切变</h3><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20230024.png" style="zoom:50%;" />
+$$
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x^{\prime}\\
+    y^{\prime}\\
+    \end{array}
+    \right]
+\end{matrix}
+=
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    1&a\\
+    0&1\\
+    \end{array}
+    \right]
+\end{matrix}
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x\\
+    y\\
+    \end{array}
+    \right]
+\end{matrix}
+$$
+``注意：将图片y轴标准化为1后再乘上对应的矩阵``
+
+<h3 id="旋转（绕原点且为逆时针）"><a href="#旋转（绕原点且为逆时针）" class="headerlink" title="旋转（绕原点且为逆时针）"></a>旋转（绕原点且为逆时针）</h3><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20230519.png" style="zoom:50%;" />
+$$
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x^{\prime}\\
+    y^{\prime}
+    \end{array}
+    \right]
+\end{matrix}
+=
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    \cos \theta&-\sin \theta\\
+    \sin \theta&\cos \theta\\
+    \end{array}
+    \right]
+\end{matrix}
+\begin{matrix}
+    \left[
+    \begin{array}\\
+    x\\
+    y\\
+    \end{array}
+    \right]
+\end{matrix}
+$$
+
+<h2 id="2-维坐标的仿射变换"><a href="#2-维坐标的仿射变换" class="headerlink" title="$2$维坐标的仿射变换"></a>$2$维坐标的仿射变换</h2><h3 id="齐次坐标"><a href="#齐次坐标" class="headerlink" title="齐次坐标"></a>齐次坐标</h3><p>$2$维的点：$(x,y,1)^T$</p>
+<p>$2$维的向量：$(x,y,0)^T$</p>
+<p>拓展：如果$(x,y,w)^T$代表一个$2$维的点，则其代表$(x&#x2F;w,y&#x2F;w,1)(w\not&#x3D;0)$</p>
+<h3 id="平移"><a href="#平移" class="headerlink" title="平移"></a>平移</h3><h1 id="begin-matrix-left-begin-array-x-prime-y-prime-w-prime-end-array-right-end-matrix"><a href="#begin-matrix-left-begin-array-x-prime-y-prime-w-prime-end-array-right-end-matrix" class="headerlink" title="$$\begin{matrix}    \left[    \begin{array}\    x^{\prime}\    y^{\prime}\    w^{\prime}\    \end{array}    \right]\end{matrix} "></a>$$<br>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x^{\prime}\<br>    y^{\prime}\<br>    w^{\prime}\<br>    \end{array}<br>    \right]<br>\end{matrix} </h1><h1 id="begin-matrix-left-begin-array-1-0-t-x-0-1-t-y-0-0-1-end-array-right-end-matrix-begin-matrix-left-begin-array-x-y-1-end-array-right-end-matrix"><a href="#begin-matrix-left-begin-array-1-0-t-x-0-1-t-y-0-0-1-end-array-right-end-matrix-begin-matrix-left-begin-array-x-y-1-end-array-right-end-matrix" class="headerlink" title="\begin{matrix}    \left[    \begin{array}\    1&amp;0&amp;t_x\    0&amp;1&amp;t_y\    0&amp;0&amp;1\    \end{array}    \right]\end{matrix}\begin{matrix}    \left[    \begin{array}\    x\    y\    1\    \end{array}    \right]\end{matrix}"></a>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    1&amp;0&amp;t_x\<br>    0&amp;1&amp;t_y\<br>    0&amp;0&amp;1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x\<br>    y\<br>    1\<br>    \end{array}<br>    \right]<br>\end{matrix}</h1><p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x+t_x\<br>    y+t_y\<br>    1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$</p>
+<h3 id="仿射变换"><a href="#仿射变换" class="headerlink" title="仿射变换"></a>仿射变换</h3><p>仿射变换 &#x3D; 线性变换 + 平移<br>$$<br>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x^{\prime}\<br>    y^{\prime}\<br>    \end{array}<br>    \right]<br>\end{matrix}</p>
+<p>&#x3D;</p>
+<p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    a&amp;b\<br>    c&amp;d\<br>    \end{array}<br>    \right]<br>\end{matrix}</p>
+<p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x\<br>    y\<br>    \end{array}<br>    \right]<br>\end{matrix}</p>
+<ul>
+<li></li>
+</ul>
+<p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    t_x\<br>    t_y\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$<br>齐次坐标下：<br>$$<br>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x^{\prime}\<br>    y^{\prime}\<br>    1\<br>    \end{array}<br>    \right]<br>\end{matrix}</p>
+<p>&#x3D;</p>
+<p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    a&amp;b&amp;t_x\<br>    c&amp;d&amp;t_y\<br>    0&amp;0&amp;1\<br>    \end{array}<br>    \right]<br>\end{matrix}</p>
+<p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    x\<br>    y\<br>    1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$</p>
+<h1 id="缩放矩阵：S-s-x-s-y"><a href="#缩放矩阵：S-s-x-s-y" class="headerlink" title="$$缩放矩阵：S(s_x,s_y)"></a>$$<br>缩放矩阵：<br>S(s_x,s_y)</h1><p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    s_x&amp;0&amp;0\<br>    0&amp;s_y&amp;0\<br>    0&amp;0&amp;1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$</p>
+<h1 id="旋转矩阵：R-alpha"><a href="#旋转矩阵：R-alpha" class="headerlink" title="$$旋转矩阵：R(\alpha)"></a>$$<br>旋转矩阵：<br>R(\alpha)</h1><p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    \cos \alpha&amp;-\sin \alpha&amp;0\<br>    \sin \alpha&amp;\cos \alpha&amp;0\<br>    0&amp;0&amp;1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$</p>
+<h1 id="平移矩阵：T-t-x-t-y"><a href="#平移矩阵：T-t-x-t-y" class="headerlink" title="$$平移矩阵：T(t_x,t_y)"></a>$$<br>平移矩阵：<br>T(t_x,t_y)</h1><p>\begin{matrix}<br>    \left[<br>    \begin{array}\<br>    1&amp;0&amp;t_x\<br>    0&amp;1&amp;t_y\<br>    0&amp;0&amp;1\<br>    \end{array}<br>    \right]<br>\end{matrix}<br>$$</p>
+<h2 id="复杂变换"><a href="#复杂变换" class="headerlink" title="复杂变换"></a>复杂变换</h2><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232159.png" style="zoom:50%;" />
+
+<p><strong>注意顺序</strong></p>
+<p>当进行一系列的仿射变换，其对应的齐次左边下的矩阵分别为：$A_1,A_2,A_3 \cdots$时</p>
+<img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232407.png" style="zoom:50%;" />
+
+<p>可以先做$A_1A_2A_3\cdots A_n$的矩阵乘法</p>
+<p>对于绕任意一点旋转，可以先将其平移至原点，旋转后再平移回原位置：</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-20%20232634.png"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/CG/" rel="tag"># CG</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/09/20/Lecture2_%E7%BA%BF%E6%80%A7%E4%BB%A3%E6%95%B0%E5%A4%8D%E4%B9%A0/" rel="prev" title="Lecture2 :线性代数复习">
+      <i class="fa fa-chevron-left"></i> Lecture2 :线性代数复习
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2024/09/21/hello-world/" rel="next" title="Hello World">
+      Hello World <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%BB%B4%E5%9D%90%E6%A0%87%E7%9A%84%E7%BA%BF%E6%80%A7%E5%8F%98%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">$2$ 维坐标的线性变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BC%A9%E6%94%BE"><span class="nav-number">1.1.</span> <span class="nav-text">缩放</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AF%B9%E7%A7%B0"><span class="nav-number">1.2.</span> <span class="nav-text">对称</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%87%E5%8F%98"><span class="nav-number">1.3.</span> <span class="nav-text">切变</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%EF%BC%88%E7%BB%95%E5%8E%9F%E7%82%B9%E4%B8%94%E4%B8%BA%E9%80%86%E6%97%B6%E9%92%88%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">旋转（绕原点且为逆时针）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-%E7%BB%B4%E5%9D%90%E6%A0%87%E7%9A%84%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2"><span class="nav-number">2.</span> <span class="nav-text">$2$维坐标的仿射变换</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%BD%90%E6%AC%A1%E5%9D%90%E6%A0%87"><span class="nav-number">2.1.</span> <span class="nav-text">齐次坐标</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E7%A7%BB"><span class="nav-number">2.2.</span> <span class="nav-text">平移</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#begin-matrix-left-begin-array-x-prime-y-prime-w-prime-end-array-right-end-matrix"><span class="nav-number"></span> <span class="nav-text">$$\begin{matrix}    \left[    \begin{array}\    x^{\prime}\    y^{\prime}\    w^{\prime}\    \end{array}    \right]\end{matrix} </span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#begin-matrix-left-begin-array-1-0-t-x-0-1-t-y-0-0-1-end-array-right-end-matrix-begin-matrix-left-begin-array-x-y-1-end-array-right-end-matrix"><span class="nav-number"></span> <span class="nav-text">\begin{matrix}    \left[    \begin{array}\    1&amp;0&amp;t_x\    0&amp;1&amp;t_y\    0&amp;0&amp;1\    \end{array}    \right]\end{matrix}\begin{matrix}    \left[    \begin{array}\    x\    y\    1\    \end{array}    \right]\end{matrix}</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%BF%E5%B0%84%E5%8F%98%E6%8D%A2"><span class="nav-number">0.1.</span> <span class="nav-text">仿射变换</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%BC%A9%E6%94%BE%E7%9F%A9%E9%98%B5%EF%BC%9AS-s-x-s-y"><span class="nav-number"></span> <span class="nav-text">$$缩放矩阵：S(s_x,s_y)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E7%9F%A9%E9%98%B5%EF%BC%9AR-alpha"><span class="nav-number"></span> <span class="nav-text">$$旋转矩阵：R(\alpha)</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%B9%B3%E7%A7%BB%E7%9F%A9%E9%98%B5%EF%BC%9AT-t-x-t-y"><span class="nav-number"></span> <span class="nav-text">$$平移矩阵：T(t_x,t_y)</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E5%8F%98%E6%8D%A2"><span class="nav-number">1.</span> <span class="nav-text">复杂变换</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Vampire</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">4</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Vampire</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
