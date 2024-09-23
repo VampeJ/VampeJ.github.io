@@ -20,12 +20,12 @@
     var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta name="description" content="视口变换在经过了变换后，需要将物体从标准空间转化到屏幕空间上，这一步即为视口变换   光栅化光栅化即为在栅格显示设备上绘制图形的一个过程 光栅化的基本单元是三角形：  三角形是最基本的多边形 三角形具有平面性 三角形可以明确定义内部与外部，通过向量的叉乘 任意多边形可以拆分成个三角形    采样采样：将所有光学信息离散成像素点的过程，其本质是函数的离散化，通过定义一个函数计算每一个像素点的函数值来">
+  <meta name="description" content="视口变换在经过了变换后，需要将物体从标准空间转化到屏幕空间上，这一步即为视口变换">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Lecture5：光栅化（三角形的离散化）">
-<meta property="og:url" content="http://example.com/2024/09/22/Lecture5_%E5%85%89%E6%A0%85%E5%8C%96/index.html">
+<meta property="og:url" content="http://example.com/2024/09/22/Lecture4_%E5%85%89%E6%A0%85%E5%8C%96/index.html">
 <meta property="og:site_name" content="Vampire">
-<meta property="og:description" content="视口变换在经过了变换后，需要将物体从标准空间转化到屏幕空间上，这一步即为视口变换   光栅化光栅化即为在栅格显示设备上绘制图形的一个过程 光栅化的基本单元是三角形：  三角形是最基本的多边形 三角形具有平面性 三角形可以明确定义内部与外部，通过向量的叉乘 任意多边形可以拆分成个三角形    采样采样：将所有光学信息离散成像素点的过程，其本质是函数的离散化，通过定义一个函数计算每一个像素点的函数值来">
+<meta property="og:description" content="视口变换在经过了变换后，需要将物体从标准空间转化到屏幕空间上，这一步即为视口变换">
 <meta property="og:locale" content="zh_CN">
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20173718.png">
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20173817.png">
@@ -34,7 +34,7 @@
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20174648.png">
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20174819.png">
 <meta property="article:published_time" content="2024-09-22T15:12:48.000Z">
-<meta property="article:modified_time" content="2024-09-22T15:14:08.332Z">
+<meta property="article:modified_time" content="2024-09-23T14:32:51.607Z">
 <meta property="article:author" content="Vampire">
 <meta property="article:tag" content="学习笔记">
 <meta property="article:tag" content="计算机图形学">
@@ -42,7 +42,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20173718.png">
 
-<link rel="canonical" href="http://example.com/2024/09/22/Lecture5_%E5%85%89%E6%A0%85%E5%8C%96/">
+<link rel="canonical" href="http://example.com/2024/09/22/Lecture4_%E5%85%89%E6%A0%85%E5%8C%96/">
 
 
 <script id="page-configurations">
@@ -287,7 +287,7 @@ mjx-container[display="true"] + br {
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/22/Lecture5_%E5%85%89%E6%A0%85%E5%8C%96/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/22/Lecture4_%E5%85%89%E6%A0%85%E5%8C%96/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -309,10 +309,16 @@ mjx-container[display="true"] + br {
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
-              
 
-              <time title="创建时间：2024-09-22 23:12:48 / 修改时间：23:14:08" itemprop="dateCreated datePublished" datetime="2024-09-22T23:12:48+08:00">2024-09-22</time>
+              <time title="创建时间：2024-09-22 23:12:48" itemprop="dateCreated datePublished" datetime="2024-09-22T23:12:48+08:00">2024-09-22</time>
             </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2024-09-23 22:32:51" itemprop="dateModified" datetime="2024-09-23T22:32:51+08:00">2024-09-23</time>
+              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -336,6 +342,7 @@ mjx-container[display="true"] + br {
       
         <h2 id="视口变换"><a href="#视口变换" class="headerlink" title="视口变换"></a>视口变换</h2><p>在经过了<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.05ex;" xmlns="http://www.w3.org/2000/svg" width="5.817ex" height="1.595ex" role="img" focusable="false" viewBox="0 -683 2571 705"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D440" d="M289 629Q289 635 232 637Q208 637 201 638T194 648Q194 649 196 659Q197 662 198 666T199 671T201 676T203 679T207 681T212 683T220 683T232 684Q238 684 262 684T307 683Q386 683 398 683T414 678Q415 674 451 396L487 117L510 154Q534 190 574 254T662 394Q837 673 839 675Q840 676 842 678T846 681L852 683H948Q965 683 988 683T1017 684Q1051 684 1051 673Q1051 668 1048 656T1045 643Q1041 637 1008 637Q968 636 957 634T939 623Q936 618 867 340T797 59Q797 55 798 54T805 50T822 48T855 46H886Q892 37 892 35Q892 19 885 5Q880 0 869 0Q864 0 828 1T736 2Q675 2 644 2T609 1Q592 1 592 11Q592 13 594 25Q598 41 602 43T625 46Q652 46 685 49Q699 52 704 61Q706 65 742 207T813 490T848 631L654 322Q458 10 453 5Q451 4 449 3Q444 0 433 0Q418 0 415 7Q413 11 374 317L335 624L267 354Q200 88 200 79Q206 46 272 46H282Q288 41 289 37T286 19Q282 3 278 1Q274 0 267 0Q265 0 255 0T221 1T157 2Q127 2 95 1T58 0Q43 0 39 2T35 11Q35 13 38 25T43 40Q45 46 65 46Q135 46 154 86Q158 92 223 354T289 629Z"></path></g><g data-mml-node="mi" transform="translate(1051,0)"><path data-c="1D449" d="M52 648Q52 670 65 683H76Q118 680 181 680Q299 680 320 683H330Q336 677 336 674T334 656Q329 641 325 637H304Q282 635 274 635Q245 630 242 620Q242 618 271 369T301 118L374 235Q447 352 520 471T595 594Q599 601 599 609Q599 633 555 637Q537 637 537 648Q537 649 539 661Q542 675 545 679T558 683Q560 683 570 683T604 682T668 681Q737 681 755 683H762Q769 676 769 672Q769 655 760 640Q757 637 743 637Q730 636 719 635T698 630T682 623T670 615T660 608T652 599T645 592L452 282Q272 -9 266 -16Q263 -18 259 -21L241 -22H234Q216 -22 216 -15Q213 -9 177 305Q139 623 138 626Q133 637 76 637H59Q52 642 52 648Z"></path></g><g data-mml-node="mi" transform="translate(1820,0)"><path data-c="1D443" d="M287 628Q287 635 230 637Q206 637 199 638T192 648Q192 649 194 659Q200 679 203 681T397 683Q587 682 600 680Q664 669 707 631T751 530Q751 453 685 389Q616 321 507 303Q500 302 402 301H307L277 182Q247 66 247 59Q247 55 248 54T255 50T272 48T305 46H336Q342 37 342 35Q342 19 335 5Q330 0 319 0Q316 0 282 1T182 2Q120 2 87 2T51 1Q33 1 33 11Q33 13 36 25Q40 41 44 43T67 46Q94 46 127 49Q141 52 146 61Q149 65 218 339T287 628ZM645 554Q645 567 643 575T634 597T609 619T560 635Q553 636 480 637Q463 637 445 637T416 636T404 636Q391 635 386 627Q384 621 367 550T332 412T314 344Q314 342 395 342H407H430Q542 342 590 392Q617 419 631 471T645 554Z"></path></g></g></g></svg></mjx-container>变换后，需要将物体从标准空间转化到屏幕空间上，这一步即为视口变换</p>
 <p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20173718.png" style="zoom:67%;"></p>
+<span id="more"></span>
 <p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-22%20173817.png" style="zoom:67%;"></p>
 <h2 id="光栅化"><a href="#光栅化" class="headerlink" title="光栅化"></a>光栅化</h2><p>光栅化即为在栅格显示设备上绘制图形的一个过程</p>
 <p>光栅化的基本单元是三角形：</p>
@@ -373,8 +380,8 @@ mjx-container[display="true"] + br {
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/09/21/Lecture4_%E5%8F%98%E6%8D%A22/" rel="prev" title="Lecture4 :变换2（3维坐标和观测变换）">
-      <i class="fa fa-chevron-left"></i> Lecture4 :变换2（3维坐标和观测变换）
+    <a href="/2024/09/20/Lecture3_%E5%8F%98%E6%8D%A2/" rel="prev" title="Lecture3 :变换（2维坐标）">
+      <i class="fa fa-chevron-left"></i> Lecture3 :变换（2维坐标）
     </a></div>
       <div class="post-nav-item"></div>
     </div>
@@ -449,7 +456,7 @@ mjx-container[display="true"] + br {
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">7</span>
+          <span class="site-state-item-count">6</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
