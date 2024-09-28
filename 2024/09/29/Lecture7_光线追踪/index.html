@@ -23,7 +23,7 @@
   <meta name="description" content="阴影贴图在之前学习到光栅化时，提到了一个问题，如何处理阴影，在光栅化时我们忽略了这个问题，接下来考虑一种利用贴图的方式来实现阴影的方式——Shadow Mapping 实现原理阴影映射的思想是：  在阴影里，说明能被相机看到但不能被光源看到 不在阴影里，说明能同时被相机和光源看到">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Lecture7：光线追踪">
-<meta property="og:url" content="http://example.com/2024/09/25/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/index.html">
+<meta property="og:url" content="http://example.com/2024/09/29/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/index.html">
 <meta property="og:site_name" content="Vampire">
 <meta property="og:description" content="阴影贴图在之前学习到光栅化时，提到了一个问题，如何处理阴影，在光栅化时我们忽略了这个问题，接下来考虑一种利用贴图的方式来实现阴影的方式——Shadow Mapping 实现原理阴影映射的思想是：  在阴影里，说明能被相机看到但不能被光源看到 不在阴影里，说明能同时被相机和光源看到">
 <meta property="og:locale" content="zh_CN">
@@ -79,8 +79,8 @@
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/ray-tracing-47.png">
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-29%20015346.png">
 <meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-29%20020021.png">
-<meta property="article:published_time" content="2024-09-24T18:14:34.000Z">
-<meta property="article:modified_time" content="2024-09-28T18:15:02.591Z">
+<meta property="article:published_time" content="2024-09-28T18:16:34.000Z">
+<meta property="article:modified_time" content="2024-09-28T18:18:19.926Z">
 <meta property="article:author" content="Vampire">
 <meta property="article:tag" content="学习笔记">
 <meta property="article:tag" content="计算机图形学">
@@ -88,7 +88,7 @@
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-09-28%20164100.png">
 
-<link rel="canonical" href="http://example.com/2024/09/25/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/">
+<link rel="canonical" href="http://example.com/2024/09/29/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/">
 
 
 <script id="page-configurations">
@@ -333,7 +333,7 @@ mjx-container[display="true"] + br {
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/25/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/09/29/Lecture7_%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/avatar.gif">
@@ -355,16 +355,10 @@ mjx-container[display="true"] + br {
                 <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">发表于</span>
+              
 
-              <time title="创建时间：2024-09-25 02:14:34" itemprop="dateCreated datePublished" datetime="2024-09-25T02:14:34+08:00">2024-09-25</time>
+              <time title="创建时间：2024-09-29 02:16:34 / 修改时间：02:18:19" itemprop="dateCreated datePublished" datetime="2024-09-29T02:16:34+08:00">2024-09-29</time>
             </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2024-09-29 02:15:02" itemprop="dateModified" datetime="2024-09-29T02:15:02+08:00">2024-09-29</time>
-              </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
                 <i class="far fa-folder"></i>
@@ -702,13 +696,10 @@ d\omega=\frac{dA\cos\theta^{\prime}}{|x^{\prime}-x|^2}</script><p>将这个式�
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2024/09/22/Lecture4_%E5%85%89%E6%A0%85%E5%8C%96/" rel="prev" title="Lecture4：光栅化">
-      <i class="fa fa-chevron-left"></i> Lecture4：光栅化
+    <a href="/2024/09/29/Lecture6_%E5%87%A0%E4%BD%95/" rel="prev" title="Lecture6：几何">
+      <i class="fa fa-chevron-left"></i> Lecture6：几何
     </a></div>
-      <div class="post-nav-item">
-    <a href="/2024/09/25/Lecture5_%E7%9D%80%E8%89%B2/" rel="next" title="Lecture5：着色">
-      Lecture5：着色 <i class="fa fa-chevron-right"></i>
-    </a></div>
+      <div class="post-nav-item"></div>
     </div>
       </footer>
     
