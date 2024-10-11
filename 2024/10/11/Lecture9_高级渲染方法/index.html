@@ -1,0 +1,771 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="高级光线传播光线传播是一个很复杂的事情，有很多提升效果的方法，如蒙特卡洛积分中概率密度函数的选择，进行路径追踪的方法，以及更高级的光子映射等 蒙特卡洛积分的估计 无偏估计：没有任何系统误差，无论使用多少样本，期望总保持一致 有偏估计：存在系统误差，即样本数量对期望会有影响一种特殊的有偏估计：一致性估计(consistent)：当样本数量取无穷大时，没有系统误差  在图形学中，有偏估计会产生模糊，但">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lecture9：高级渲染方法">
+<meta property="og:url" content="http://example.com/2024/10/11/Lecture9_%E9%AB%98%E7%BA%A7%E6%B8%B2%E6%9F%93%E6%96%B9%E6%B3%95/index.html">
+<meta property="og:site_name" content="Vampire">
+<meta property="og:description" content="高级光线传播光线传播是一个很复杂的事情，有很多提升效果的方法，如蒙特卡洛积分中概率密度函数的选择，进行路径追踪的方法，以及更高级的光子映射等 蒙特卡洛积分的估计 无偏估计：没有任何系统误差，无论使用多少样本，期望总保持一致 有偏估计：存在系统误差，即样本数量对期望会有影响一种特殊的有偏估计：一致性估计(consistent)：当样本数量取无穷大时，没有系统误差  在图形学中，有偏估计会产生模糊，但">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-10%20232726.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-10%20232955.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20101333.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20101544.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011103741288.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20103903.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20103924.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20104616.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20104939.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20105932.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110049.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110105.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110313.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110708.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110805.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110826.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110945.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111049365.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111213.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111325.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111440172.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111455.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111512.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111528.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111743949.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111907.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112116.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112135.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112239.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112730.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112806.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20120729.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121316.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121400.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011121430224.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121616.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121633.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122020.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122308.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011122438669.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011122517090.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122749.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122933.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123158.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123212.png">
+<meta property="og:image" content="c:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011123236483.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123255.png">
+<meta property="article:published_time" content="2024-10-11T04:37:11.000Z">
+<meta property="article:modified_time" content="2024-10-11T04:38:52.083Z">
+<meta property="article:author" content="Vampire">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="计算机图形学">
+<meta property="article:tag" content="GAMES101">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-10%20232726.png">
+
+<link rel="canonical" href="http://example.com/2024/10/11/Lecture9_%E9%AB%98%E7%BA%A7%E6%B8%B2%E6%9F%93%E6%96%B9%E6%B3%95/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lecture9：高级渲染方法 | Vampire</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Vampire</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/11/Lecture9_%E9%AB%98%E7%BA%A7%E6%B8%B2%E6%9F%93%E6%96%B9%E6%B3%95/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vampire">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vampire">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lecture9：高级渲染方法
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-11 12:37:11 / 修改时间：12:38:52" itemprop="dateCreated datePublished" datetime="2024-10-11T12:37:11+08:00">2024-10-11</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机图形学</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="高级光线传播"><a href="#高级光线传播" class="headerlink" title="高级光线传播"></a>高级光线传播</h2><p>光线传播是一个很复杂的事情，有很多提升效果的方法，如蒙特卡洛积分中概率密度函数的选择，进行路径追踪的方法，以及更高级的光子映射等</p>
+<h3 id="蒙特卡洛积分的估计"><a href="#蒙特卡洛积分的估计" class="headerlink" title="蒙特卡洛积分的估计"></a>蒙特卡洛积分的估计</h3><ul>
+<li>无偏估计：没有任何系统误差，无论使用多少样本，期望总保持一致</li>
+<li>有偏估计：存在系统误差，即样本数量对期望会有影响<br>一种特殊的有偏估计：一致性估计(consistent)：当样本数量取无穷大时，没有系统误差</li>
+</ul>
+<p>在图形学中，有偏估计会产生模糊，但是对于一致性估计当样本数量无穷大时则会变清晰</p>
+<h3 id="双向路径追踪（BDPT，Bidirectional-Path-Tracing）"><a href="#双向路径追踪（BDPT，Bidirectional-Path-Tracing）" class="headerlink" title="双向路径追踪（BDPT，Bidirectional Path Tracing）"></a>双向路径追踪（BDPT，Bidirectional Path Tracing）</h3><p>BDPT是一种无偏的光线追踪方法</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-10%20232726.png" style="zoom: 67%;"></p>
+<ul>
+<li>从相机和光源两端出发对一条光路的子路进行追踪</li>
+<li>将子路的两个端点连接得到一条光路</li>
+<li>适用于光源在一个角落时效果较好</li>
+<li>但是难以实现且非常慢</li>
+</ul>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-10%20232955.png" style="zoom:50%;"></p>
+<h3 id="Metropolis光线追踪（MLT，Metropolis-Light-Transport）"><a href="#Metropolis光线追踪（MLT，Metropolis-Light-Transport）" class="headerlink" title="Metropolis光线追踪（MLT，Metropolis Light Transport）"></a>Metropolis光线追踪（MLT，Metropolis Light Transport）</h3><p>MLT是一种无偏的光线追踪，基本思想是找到一条光路后，通过马尔科夫链的形式，根据当前的光线产生一个局部扰动，来生成与其靠近的下一条光线，可以生成任意形状的PDF</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20101333.png" style="zoom:67%;"></p>
+<ul>
+<li>适合做复杂的光路传播，只需要找到一条路径作为种子即可</li>
+<li>是一种无偏估计</li>
+<li>但是难以估计什么时候收敛</li>
+<li>所有操作都是局部的，使得图片看上去比较脏</li>
+<li>不能渲染动画，画面会发生闪烁和抖动</li>
+</ul>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20101544.png" style="zoom:50%;"></p>
+<h3 id="光子映射（Photon-Mapping）"><a href="#光子映射（Photon-Mapping）" class="headerlink" title="光子映射（Photon Mapping）"></a>光子映射（Photon Mapping）</h3><p>由于光线的聚焦，再观察时会出现一些亮斑，这种现象称为：焦散（caustics）</p>
+<p>而光子映射可以有效地实现这一效果，但光子映射是一种有偏的估计方法，在处理Specular-Diffuse-Specular（SDS）这一类材质时也有较好的渲染效果</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011103741288.png" alt="image-20241011103741288" style="zoom:67%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20103903.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20103924.png" style="zoom:50%;"></p>
+<p>光子映射主要分为三个阶段：</p>
+<ul>
+<li>从光源发射光子，让光子发生弹射，直到打在发生漫反射物体的表面，记录光子的位置</li>
+<li>从相机发出光子，让光子发生弹射，直到打在发生漫反射物体的表面，记录光子的位置</li>
+<li>在第二次到达漫反射物体表面时，对光子的密度进行局部估计，找到离这个光子最近的N个光子，计算这些光子所占据的面积，最后得到局部密度</li>
+</ul>
+<p>有偏的原因：<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.799ex;" xmlns="http://www.w3.org/2000/svg" width="10.014ex" height="2.836ex" role="img" focusable="false" viewBox="0 -900.3 4426.1 1253.6"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mfrac"><g data-mml-node="mrow" transform="translate(220,394) scale(0.707)"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(520,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g><g data-mml-node="mrow" transform="translate(268.8,-346.3) scale(0.707)"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(520,0)"><path data-c="1D434" d="M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z"></path></g></g><rect width="1195.6" height="60" x="120" y="220"></rect></g><g data-mml-node="mo" transform="translate(1713.4,0)"><path data-c="2260" d="M166 -215T159 -215T147 -212T141 -204T139 -197Q139 -190 144 -183L306 133H70Q56 140 56 153Q56 168 72 173H327L406 327H72Q56 332 56 347Q56 360 70 367H426Q597 702 602 707Q605 716 618 716Q625 716 630 712T636 703T638 696Q638 692 471 367H707Q722 359 722 347Q722 336 708 328L451 327L371 173H708Q722 163 722 153Q722 140 707 133H351Q175 -210 170 -212Q166 -215 159 -215Z"></path></g><g data-mml-node="mfrac" transform="translate(2769.2,0)"><g data-mml-node="mrow" transform="translate(220,394) scale(0.707)"><g data-mml-node="mi"><path data-c="394" d="M51 0Q46 4 46 7Q46 9 215 357T388 709Q391 716 416 716Q439 716 444 709Q447 705 616 357T786 7Q786 4 781 0H51ZM507 344L384 596L137 92L383 91H630Q630 93 507 344Z"></path></g><g data-mml-node="mi" transform="translate(833,0)"><path data-c="1D441" d="M234 637Q231 637 226 637Q201 637 196 638T191 649Q191 676 202 682Q204 683 299 683Q376 683 387 683T401 677Q612 181 616 168L670 381Q723 592 723 606Q723 633 659 637Q635 637 635 648Q635 650 637 660Q641 676 643 679T653 683Q656 683 684 682T767 680Q817 680 843 681T873 682Q888 682 888 672Q888 650 880 642Q878 637 858 637Q787 633 769 597L620 7Q618 0 599 0Q585 0 582 2Q579 5 453 305L326 604L261 344Q196 88 196 79Q201 46 268 46H278Q284 41 284 38T282 19Q278 6 272 0H259Q228 2 151 2Q123 2 100 2T63 2T46 1Q31 1 31 10Q31 14 34 26T39 40Q41 46 62 46Q130 49 150 85Q154 91 221 362L289 634Q287 635 234 637Z"></path></g></g><g data-mml-node="mrow" transform="translate(268.8,-346.3) scale(0.707)"><g data-mml-node="mi"><path data-c="394" d="M51 0Q46 4 46 7Q46 9 215 357T388 709Q391 716 416 716Q439 716 444 709Q447 705 616 357T786 7Q786 4 781 0H51ZM507 344L384 596L137 92L383 91H630Q630 93 507 344Z"></path></g><g data-mml-node="mi" transform="translate(833,0)"><path data-c="1D434" d="M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z"></path></g></g><rect width="1416.9" height="60" x="120" y="220"></rect></g></g></g></svg></mjx-container>，只有当<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="2.873ex" height="1.643ex" role="img" focusable="false" viewBox="0 -716 1270 726"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(520,0)"><path data-c="1D434" d="M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z"></path></g></g></g></svg></mjx-container>足够小时才接近正确</p>
+<p>减小误差的方法：发出更多的光子，此时<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: 0;" xmlns="http://www.w3.org/2000/svg" width="3.581ex" height="1.62ex" role="img" focusable="false" viewBox="0 -716 1583 716"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="394" d="M51 0Q46 4 46 7Q46 9 215 357T388 709Q391 716 416 716Q439 716 444 709Q447 705 616 357T786 7Q786 4 781 0H51ZM507 344L384 596L137 92L383 91H630Q630 93 507 344Z"></path></g><g data-mml-node="mi" transform="translate(833,0)"><path data-c="1D434" d="M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z"></path></g></g></g></svg></mjx-container>会变小，更加接近<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.023ex;" xmlns="http://www.w3.org/2000/svg" width="2.873ex" height="1.643ex" role="img" focusable="false" viewBox="0 -716 1270 726"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D451" d="M366 683Q367 683 438 688T511 694Q523 694 523 686Q523 679 450 384T375 83T374 68Q374 26 402 26Q411 27 422 35Q443 55 463 131Q469 151 473 152Q475 153 483 153H487H491Q506 153 506 145Q506 140 503 129Q490 79 473 48T445 8T417 -8Q409 -10 393 -10Q359 -10 336 5T306 36L300 51Q299 52 296 50Q294 48 292 46Q233 -10 172 -10Q117 -10 75 30T33 157Q33 205 53 255T101 341Q148 398 195 420T280 442Q336 442 364 400Q369 394 369 396Q370 400 396 505T424 616Q424 629 417 632T378 637H357Q351 643 351 645T353 664Q358 683 366 683ZM352 326Q329 405 277 405Q242 405 210 374T160 293Q131 214 119 129Q119 126 119 118T118 106Q118 61 136 44T179 26Q233 26 290 98L298 109L352 326Z"></path></g><g data-mml-node="mi" transform="translate(520,0)"><path data-c="1D434" d="M208 74Q208 50 254 46Q272 46 272 35Q272 34 270 22Q267 8 264 4T251 0Q249 0 239 0T205 1T141 2Q70 2 50 0H42Q35 7 35 11Q37 38 48 46H62Q132 49 164 96Q170 102 345 401T523 704Q530 716 547 716H555H572Q578 707 578 706L606 383Q634 60 636 57Q641 46 701 46Q726 46 726 36Q726 34 723 22Q720 7 718 4T704 0Q701 0 690 0T651 1T578 2Q484 2 455 0H443Q437 6 437 9T439 27Q443 40 445 43L449 46H469Q523 49 533 63L521 213H283L249 155Q208 86 208 74ZM516 260Q516 271 504 416T490 562L463 519Q447 492 400 412L310 260L413 259Q516 259 516 260Z"></path></g></g></g></svg></mjx-container></p>
+<p>因此光子映射是有偏的但是是一致的</p>
+<h3 id="顶点合并连接（VCM，Vertex-Connection-and-Merging）"><a href="#顶点合并连接（VCM，Vertex-Connection-and-Merging）" class="headerlink" title="顶点合并连接（VCM，Vertex Connection and Merging）"></a>顶点合并连接（VCM，Vertex Connection and Merging）</h3><p>VCM方法是一种BDPT与光子映射的结合</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20104616.png" style="zoom:67%;"></p>
+<ul>
+<li>如果在进行BDPT时两个端点无法被连接，而是可以融合，则不需要连接</li>
+<li>在这些端点附近通过光子映射求密度的方式进行顶点的融合</li>
+</ul>
+<h3 id="实时辐射度算法（IR，Instant-Radiosity）"><a href="#实时辐射度算法（IR，Instant-Radiosity）" class="headerlink" title="实时辐射度算法（IR，Instant Radiosity）"></a>实时辐射度算法（IR，Instant Radiosity）</h3><p>基本思想是将已经照亮的表面当作光源继续发射光线</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20104939.png" style="zoom:67%;"></p>
+<ul>
+<li>从光源发出一次光线到达物体表面，物体表面能到达的点视为虚拟光源</li>
+<li>继续使用这些虚拟光源照亮物体</li>
+<li>可以快速渲染出一些主要发生漫反射的场景</li>
+<li>但如果这些虚拟光源与着色点十分接近时，这些点会发生融合从而出现一些过亮的点</li>
+<li>不能渲染Glossy的材质</li>
+</ul>
+<h2 id="高级外观建模"><a href="#高级外观建模" class="headerlink" title="高级外观建模"></a>高级外观建模</h2><p>在材质与外观一节中提到，材质本质上就是外观的一种形式，是光线与表面的作用不同所表现出来的外观，但是有一些传播介质无法用材质来解释，不发生在表面，而是在光线传播的过程中作用，如：云，雾，水体等</p>
+<h3 id="非表面模型"><a href="#非表面模型" class="headerlink" title="非表面模型"></a>非表面模型</h3><p>光会穿过这一类传播介质，而与光的作用也发生在介质内</p>
+<h4 id="散射介质"><a href="#散射介质" class="headerlink" title="散射介质"></a>散射介质</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20105932.png" style="zoom:67%;"></p>
+<p>当光穿过散射介质时，任何一点可以部分吸收和散射</p>
+<p>可以使用相位函数来描述参与介质中任意点的光散射角的分布</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110049.png" style="zoom:67%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110105.png" style="zoom:67%;"></p>
+<p>具体过程：</p>
+<ul>
+<li>随机选择一个方向进行弹射</li>
+<li>随机选择一个距离直行</li>
+<li>对于每一个着色点将其连接到光源，通过前面学习到的渲染方程进行着色</li>
+</ul>
+<h4 id="人物头发渲染"><a href="#人物头发渲染" class="headerlink" title="人物头发渲染"></a>人物头发渲染</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110313.png" style="zoom:50%;"></p>
+<p>头发是一个复杂的结构，仔细观察可以发现在头发上会出现两种不同的高光，一种是环境光所造成的较暗一点的高光，一种是穿过头发后发生的一些复杂传播形成的细碎的亮斑</p>
+<p>（1）Kajiya-Kay Model</p>
+<p>将头发视为一个会发生散射的柱体，光线会被散射在一个圆锥面上，但这个模型有一个缺点，最后做出来的渲染效果不经过优化的话会导致过亮</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110708.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110805.png" style="zoom:50%;"></p>
+<p>（2）Marschner Model</p>
+<p>将头发视为即可发生反射也可发生折射的一种模型，R表示发生一次反射，T表示发生一次折射</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110826.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20110945.png" style="zoom:50%;"></p>
+<p>将头发当作一个玻璃圆柱体，外层和内层材质不同，同时发生反射和投射</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111049365.png" alt="image-20241011111049365" style="zoom:50%;"></p>
+<h4 id="动物毛发渲染"><a href="#动物毛发渲染" class="headerlink" title="动物毛发渲染"></a>动物毛发渲染</h4><p>如果使用和人物头发渲染同样的方式来对动物的毛发进行渲染，结果发现具有很大的偏差</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111213.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111325.png" style="zoom:50%;"></p>
+<p>原因是动物毛发与人物头发虽然结构类似，但是不同结构的含量，占比有很大的差别，因此会产生误差</p>
+<p>明显可以看出，在动物毛发中能发生光线散射的髓质会更多，因此光线更分散</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111440172.png" alt="image-20241011111440172" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111455.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111512.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111528.png" style="zoom:50%;"></p>
+<p>可以采用双层圆柱结构来描述这一特性，由此将光线分为了五类，除了单层圆柱中的三种，还有两类在内层圆柱中发生散射后的光线</p>
+<h4 id="颗粒材质"><a href="#颗粒材质" class="headerlink" title="颗粒材质"></a>颗粒材质</h4><p>与其他传播介质都是一个整体不同，颗粒材质是由细小颗粒之间的作用而形成的一种介质</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011111743949.png" alt="image-20241011111743949" style="zoom:50%;"></p>
+<p>这种介质可以通过一种程序化生成的方法来进行渲染</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20111907.png" style="zoom:50%;"></p>
+<h3 id="复杂的表面模型"><a href="#复杂的表面模型" class="headerlink" title="复杂的表面模型"></a>复杂的表面模型</h3><p>一些特殊的表面模型同样不止在表面与光线发生作用</p>
+<h4 id="半透明材质"><a href="#半透明材质" class="headerlink" title="半透明材质"></a>半透明材质</h4><p>典型的半透明材质就是玉石</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112116.png" style="zoom:33%;"><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112135.png" style="zoom:33%;"></p>
+<h4 id="次表面散射"><a href="#次表面散射" class="headerlink" title="次表面散射"></a>次表面散射</h4><p>在表面下发生的散射，即发生在材质内</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112239.png" style="zoom:50%;"></p>
+<p>是BRDF的一种延申，表示某一点出射光线的辐射亮度来源于另一点的辐射照度<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="15.047ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 6650.8 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D446" d="M308 24Q367 24 416 76T466 197Q466 260 414 284Q308 311 278 321T236 341Q176 383 176 462Q176 523 208 573T273 648Q302 673 343 688T407 704H418H425Q521 704 564 640Q565 640 577 653T603 682T623 704Q624 704 627 704T632 705Q645 705 645 698T617 577T585 459T569 456Q549 456 549 465Q549 471 550 475Q550 478 551 494T553 520Q553 554 544 579T526 616T501 641Q465 662 419 662Q362 662 313 616T263 510Q263 480 278 458T319 427Q323 425 389 408T456 390Q490 379 522 342T554 242Q554 216 546 186Q541 164 528 137T492 78T426 18T332 -20Q320 -22 298 -22Q199 -22 144 33L134 44L106 13Q83 -14 78 -18T65 -22Q52 -22 52 -14Q52 -11 110 221Q112 227 130 227H143Q149 221 149 216Q149 214 148 207T144 186T142 153Q144 114 160 87T203 47T255 29T308 24Z"></path></g><g data-mml-node="mo" transform="translate(645,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msub" transform="translate(1034,0)"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mi" transform="translate(605,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="mo" transform="translate(1933,0)"><path data-c="2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path></g><g data-mml-node="msub" transform="translate(2377.6,0)"><g data-mml-node="mi"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g><g data-mml-node="mi" transform="translate(655,-150) scale(0.707)"><path data-c="1D456" d="M184 600Q184 624 203 642T247 661Q265 661 277 649T290 619Q290 596 270 577T226 557Q211 557 198 567T184 600ZM21 287Q21 295 30 318T54 369T98 420T158 442Q197 442 223 419T250 357Q250 340 236 301T196 196T154 83Q149 61 149 51Q149 26 166 26Q175 26 185 29T208 43T235 78T260 137Q263 149 265 151T282 153Q302 153 302 143Q302 135 293 112T268 61T223 11T161 -11Q129 -11 102 10T74 74Q74 91 79 106T122 220Q160 321 166 341T173 380Q173 404 156 404H154Q124 404 99 371T61 287Q60 286 59 284T58 281T56 279T53 278T49 278T41 278H27Q21 284 21 287Z"></path></g></g><g data-mml-node="mo" transform="translate(3326.6,0)"><path data-c="2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path></g><g data-mml-node="msub" transform="translate(3771.2,0)"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mi" transform="translate(605,-150) scale(0.707)"><path data-c="1D45C" d="M201 -11Q126 -11 80 38T34 156Q34 221 64 279T146 380Q222 441 301 441Q333 441 341 440Q354 437 367 433T402 417T438 387T464 338T476 268Q476 161 390 75T201 -11ZM121 120Q121 70 147 48T206 26Q250 26 289 58T351 142Q360 163 374 216T388 308Q388 352 370 375Q346 405 306 405Q243 405 195 347Q158 303 140 230T121 120Z"></path></g></g><g data-mml-node="mo" transform="translate(4769.2,0)"><path data-c="2C" d="M78 35T78 60T94 103T137 121Q165 121 187 96T210 8Q210 -27 201 -60T180 -117T154 -158T130 -185T117 -194Q113 -194 104 -185T95 -172Q95 -168 106 -156T131 -126T157 -76T173 -3V9L172 8Q170 7 167 6T161 3T152 1T140 0Q113 0 96 17Z"></path></g><g data-mml-node="msub" transform="translate(5213.9,0)"><g data-mml-node="mi"><path data-c="1D714" d="M495 384Q495 406 514 424T555 443Q574 443 589 425T604 364Q604 334 592 278T555 155T483 38T377 -11Q297 -11 267 66Q266 68 260 61Q201 -11 125 -11Q15 -11 15 139Q15 230 56 325T123 434Q135 441 147 436Q160 429 160 418Q160 406 140 379T94 306T62 208Q61 202 61 187Q61 124 85 100T143 76Q201 76 245 129L253 137V156Q258 297 317 297Q348 297 348 261Q348 243 338 213T318 158L308 135Q309 133 310 129T318 115T334 97T358 83T393 76Q456 76 501 148T546 274Q546 305 533 325T508 357T495 384Z"></path></g><g data-mml-node="mi" transform="translate(655,-150) scale(0.707)"><path data-c="1D45C" d="M201 -11Q126 -11 80 38T34 156Q34 221 64 279T146 380Q222 441 301 441Q333 441 341 440Q354 437 367 433T402 417T438 387T464 338T476 268Q476 161 390 75T201 -11ZM121 120Q121 70 147 48T206 26Q250 26 289 58T351 142Q360 163 374 216T388 308Q388 352 370 375Q346 405 306 405Q243 405 195 347Q158 303 140 230T121 120Z"></path></g></g><g data-mml-node="mo" transform="translate(6261.8,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container></p>
+<p>对每一点都对表面进行一次积分，则修改方程即为：</p>
+<script type="math/tex; mode=display">
+L(x_o,\omega_o)=\int_A\int_{H^2}S(x_i,\omega_i,x_o,\omega_o)L_i(x_i,\omega_i)\cos\theta_id\omega_idA</script><p>一种近似方式为引入一对偶极子进行近似，引入两个点光源来近似次表面散射的效果</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112730.png" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20112806.png" style="zoom:50%;"></p>
+<h3 id="布料"><a href="#布料" class="headerlink" title="布料"></a>布料</h3><p>布料由一系列缠绕的纤维构成</p>
+<ul>
+<li>纤维缠绕构成股</li>
+<li>股缠绕构成线</li>
+</ul>
+<p>而对于线的编织方式同样存在多种可能</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20120729.png" style="zoom:50%;"></p>
+<p>对于布料有三种渲染方式：</p>
+<ul>
+<li>将布料当作表面渲染，通过BRDF进行计算</li>
+<li>将布料当作散射介质渲染，将布料中单个的纤维和分布的性质转化为散射参数</li>
+<li>将布料当作真实的纤维渲染，类似于毛发渲染，一根一根纤维进行</li>
+</ul>
+<h3 id="细节外观"><a href="#细节外观" class="headerlink" title="细节外观"></a>细节外观</h3><p>有时渲染的效果已经达到了一种很好的效果，但是看起来却没有实际的真实感，这是因为渲染的“过于完美”，而在实际生活中物体表面有着各种各样的细节</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121316.png" style="zoom: 25%;"><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121400.png" style="zoom:25%;"><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011121430224.png" alt="image-20241011121430224" style="zoom:25%;"></p>
+<p>原因是因为当采用微表面模型的BRDF时，法线的分布函数在理论中采用了标准的理论正态分布函数，但是实际状况要复杂的多</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121616.png" style="zoom: 33%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20121633.png" style="zoom:33%;"></p>
+<p>而要做出这样的效果十分困难，其中一种是采用一种很大的法线贴图来表现细节，但是这种渲染方式极其慢</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122020.png" style="zoom:50%;"></p>
+<p>重新考虑微表面模型，一个像素会覆盖很多微表面，可以通过将一个像素所覆盖的微表面模型的法线分布算出来替换光滑的法线分布用在微表面模型中</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122308.png" style="zoom:33%;"></p>
+<p>对于较小的微表面来说，表现的更有该表面的特点；对于较大的微表面来说，表现得更具有统计学规律</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011122438669.png" alt="image-20241011122438669" style="zoom:33%;"></p>
+<p>而不同类型的法线贴图也会产生不同的效果</p>
+<p><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011122517090.png" alt="image-20241011122517090" style="zoom:33%;"></p>
+<h2 id="波动光学"><a href="#波动光学" class="headerlink" title="波动光学"></a>波动光学</h2><p>在光线追踪中，有一个重要的假设，光是一束束的，沿直线传播，但在物理中，光是有波粒二象性的，因此如果考虑光以波的形式传播，就会得到不同的结果，并且在微观下会发生衍射，干涉等现象，这种现象在某些渲染场景下更符合实际</p>
+<p>闫令琪老师的一项重要研究就是：通过波动光学方程重写渲染方程</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122749.png" style="zoom:50%;"></p>
+<p>波动光学的BRDF与几何相似，但是相对而言比较不连续</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20122933.png" style="zoom: 33%;"></p>
+<h2 id="程序化生成外观"><a href="#程序化生成外观" class="headerlink" title="程序化生成外观"></a>程序化生成外观</h2><p>在纹理学习中，提到过这样一个事情，可以通过定义不同的噪声函数，进行计算而不使用贴图来计算一些渲染细节，如大理石花纹，地形，水面，木头等</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123158.png" style="zoom:33%;"><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123212.png" style="zoom:33%;"><img src="C:\Users\Vampire\AppData\Roaming\Typora\typora-user-images\image-20241011123236483.png" alt="image-20241011123236483" style="zoom:33%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/%E5%B1%8F%E5%B9%95%E6%88%AA%E5%9B%BE%202024-10-11%20123255.png" style="zoom:50%;"></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">if noise(x,y,z) &gt; threshold:</span><br><span class="line">	reflectance = 1</span><br><span class="line">else</span><br><span class="line">	reflectance = 0</span><br></pre></td></tr></table></figure>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/" rel="tag"># 计算机图形学</a>
+              <a href="/tags/GAMES101/" rel="tag"># GAMES101</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/10/10/Lecture8_%E6%9D%90%E8%B4%A8%E4%B8%8E%E5%A4%96%E8%A7%82/" rel="prev" title="Lecture8：材质与外观">
+      <i class="fa fa-chevron-left"></i> Lecture8：材质与外观
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%85%89%E7%BA%BF%E4%BC%A0%E6%92%AD"><span class="nav-number">1.</span> <span class="nav-text">高级光线传播</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%92%99%E7%89%B9%E5%8D%A1%E6%B4%9B%E7%A7%AF%E5%88%86%E7%9A%84%E4%BC%B0%E8%AE%A1"><span class="nav-number">1.1.</span> <span class="nav-text">蒙特卡洛积分的估计</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8F%8C%E5%90%91%E8%B7%AF%E5%BE%84%E8%BF%BD%E8%B8%AA%EF%BC%88BDPT%EF%BC%8CBidirectional-Path-Tracing%EF%BC%89"><span class="nav-number">1.2.</span> <span class="nav-text">双向路径追踪（BDPT，Bidirectional Path Tracing）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Metropolis%E5%85%89%E7%BA%BF%E8%BF%BD%E8%B8%AA%EF%BC%88MLT%EF%BC%8CMetropolis-Light-Transport%EF%BC%89"><span class="nav-number">1.3.</span> <span class="nav-text">Metropolis光线追踪（MLT，Metropolis Light Transport）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%89%E5%AD%90%E6%98%A0%E5%B0%84%EF%BC%88Photon-Mapping%EF%BC%89"><span class="nav-number">1.4.</span> <span class="nav-text">光子映射（Photon Mapping）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%A1%B6%E7%82%B9%E5%90%88%E5%B9%B6%E8%BF%9E%E6%8E%A5%EF%BC%88VCM%EF%BC%8CVertex-Connection-and-Merging%EF%BC%89"><span class="nav-number">1.5.</span> <span class="nav-text">顶点合并连接（VCM，Vertex Connection and Merging）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%9E%E6%97%B6%E8%BE%90%E5%B0%84%E5%BA%A6%E7%AE%97%E6%B3%95%EF%BC%88IR%EF%BC%8CInstant-Radiosity%EF%BC%89"><span class="nav-number">1.6.</span> <span class="nav-text">实时辐射度算法（IR，Instant Radiosity）</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%AB%98%E7%BA%A7%E5%A4%96%E8%A7%82%E5%BB%BA%E6%A8%A1"><span class="nav-number">2.</span> <span class="nav-text">高级外观建模</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E8%A1%A8%E9%9D%A2%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.1.</span> <span class="nav-text">非表面模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%95%A3%E5%B0%84%E4%BB%8B%E8%B4%A8"><span class="nav-number">2.1.1.</span> <span class="nav-text">散射介质</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%BA%E7%89%A9%E5%A4%B4%E5%8F%91%E6%B8%B2%E6%9F%93"><span class="nav-number">2.1.2.</span> <span class="nav-text">人物头发渲染</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8A%A8%E7%89%A9%E6%AF%9B%E5%8F%91%E6%B8%B2%E6%9F%93"><span class="nav-number">2.1.3.</span> <span class="nav-text">动物毛发渲染</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%A2%97%E7%B2%92%E6%9D%90%E8%B4%A8"><span class="nav-number">2.1.4.</span> <span class="nav-text">颗粒材质</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E6%9D%82%E7%9A%84%E8%A1%A8%E9%9D%A2%E6%A8%A1%E5%9E%8B"><span class="nav-number">2.2.</span> <span class="nav-text">复杂的表面模型</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%8D%8A%E9%80%8F%E6%98%8E%E6%9D%90%E8%B4%A8"><span class="nav-number">2.2.1.</span> <span class="nav-text">半透明材质</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%AC%A1%E8%A1%A8%E9%9D%A2%E6%95%A3%E5%B0%84"><span class="nav-number">2.2.2.</span> <span class="nav-text">次表面散射</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%83%E6%96%99"><span class="nav-number">2.3.</span> <span class="nav-text">布料</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%86%E8%8A%82%E5%A4%96%E8%A7%82"><span class="nav-number">2.4.</span> <span class="nav-text">细节外观</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B3%A2%E5%8A%A8%E5%85%89%E5%AD%A6"><span class="nav-number">3.</span> <span class="nav-text">波动光学</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A8%8B%E5%BA%8F%E5%8C%96%E7%94%9F%E6%88%90%E5%A4%96%E8%A7%82"><span class="nav-number">4.</span> <span class="nav-text">程序化生成外观</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Vampire</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">11</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Vampire</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
