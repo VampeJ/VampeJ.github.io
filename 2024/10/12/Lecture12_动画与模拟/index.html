@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 7.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"example.com","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="动画将3维模型和2维图片延申到时间的维度，按照顺序和一定的频率播放图片  电影：24帧 视频：30帧 虚拟现实：90帧以上">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Lecture12：动画与模拟">
+<meta property="og:url" content="http://example.com/2024/10/12/Lecture12_%E5%8A%A8%E7%94%BB%E4%B8%8E%E6%A8%A1%E6%8B%9F/index.html">
+<meta property="og:site_name" content="Vampire">
+<meta property="og:description" content="动画将3维模型和2维图片延申到时间的维度，按照顺序和一定的频率播放图片  电影：24帧 视频：30帧 虚拟现实：90帧以上">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011225948407.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230045418.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230236336.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230337470.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230459410.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230541023.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230633233.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230704348.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230913702.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230946984.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231053308.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231221334.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231400155.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231852332.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232150880.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232602751.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232750313.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232836117.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232910625.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233041887.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233134365.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233145905.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233512148.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233654939.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233748542.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233835672.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234011995.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234102170.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234235810.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234355452.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234449588.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234650594.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234811432.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234821947.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234858413.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011235148891.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011235451971.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000517661.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000721290.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000931992.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012001010607.png">
+<meta property="og:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012001146468.png">
+<meta property="article:published_time" content="2024-10-11T16:12:56.000Z">
+<meta property="article:modified_time" content="2024-10-11T16:15:22.444Z">
+<meta property="article:author" content="Vampire">
+<meta property="article:tag" content="学习笔记">
+<meta property="article:tag" content="计算机图形学">
+<meta property="article:tag" content="GAMES101">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011225948407.png">
+
+<link rel="canonical" href="http://example.com/2024/10/12/Lecture12_%E5%8A%A8%E7%94%BB%E4%B8%8E%E6%A8%A1%E6%8B%9F/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>Lecture12：动画与模拟 | Vampire</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<style>mjx-container[jax="SVG"] {
+  direction: ltr;
+}
+
+mjx-container[jax="SVG"] > svg {
+  overflow: visible;
+}
+
+mjx-container[jax="SVG"][display="true"] {
+  display: block;
+  text-align: center;
+  margin: 1em 0;
+}
+
+mjx-container[jax="SVG"][justify="left"] {
+  text-align: left;
+}
+
+mjx-container[jax="SVG"][justify="right"] {
+  text-align: right;
+}
+
+g[data-mml-node="merror"] > g {
+  fill: red;
+  stroke: red;
+}
+
+g[data-mml-node="merror"] > rect[data-background] {
+  fill: yellow;
+  stroke: none;
+}
+
+g[data-mml-node="mtable"] > line[data-line] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > rect[data-frame] {
+  stroke-width: 70px;
+  fill: none;
+}
+
+g[data-mml-node="mtable"] > .mjx-dashed {
+  stroke-dasharray: 140;
+}
+
+g[data-mml-node="mtable"] > .mjx-dotted {
+  stroke-linecap: round;
+  stroke-dasharray: 0,140;
+}
+
+g[data-mml-node="mtable"] > svg {
+  overflow: visible;
+}
+
+[jax="SVG"] mjx-tool {
+  display: inline-block;
+  position: relative;
+  width: 0;
+  height: 0;
+}
+
+[jax="SVG"] mjx-tool > mjx-tip {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+mjx-tool > mjx-tip {
+  display: inline-block;
+  padding: .2em;
+  border: 1px solid #888;
+  font-size: 70%;
+  background-color: #F8F8F8;
+  color: black;
+  box-shadow: 2px 2px 5px #AAAAAA;
+}
+
+g[data-mml-node="maction"][data-toggle] {
+  cursor: pointer;
+}
+
+mjx-status {
+  display: block;
+  position: fixed;
+  left: 1em;
+  bottom: 1em;
+  min-width: 25%;
+  padding: .2em .4em;
+  border: 1px solid #888;
+  font-size: 90%;
+  background-color: #F8F8F8;
+  color: black;
+}
+
+foreignObject[data-mjx-xml] {
+  font-family: initial;
+  line-height: normal;
+  overflow: visible;
+}
+
+.MathJax path {
+  stroke-width: 3;
+}
+
+mjx-container[display="true"] {
+  overflow: auto hidden;
+}
+
+mjx-container[display="true"] + br {
+  display: none;
+}
+</style></head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Vampire</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://example.com/2024/10/12/Lecture12_%E5%8A%A8%E7%94%BB%E4%B8%8E%E6%A8%A1%E6%8B%9F/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Vampire">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Vampire">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          Lecture12：动画与模拟
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+              
+
+              <time title="创建时间：2024-10-12 00:12:56 / 修改时间：00:15:22" itemprop="dateCreated datePublished" datetime="2024-10-12T00:12:56+08:00">2024-10-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/" itemprop="url" rel="index"><span itemprop="name">计算机图形学</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h2 id="动画"><a href="#动画" class="headerlink" title="动画"></a>动画</h2><p>将3维模型和2维图片延申到时间的维度，按照顺序和一定的频率播放图片</p>
+<ul>
+<li>电影：24帧</li>
+<li>视频：30帧</li>
+<li>虚拟现实：90帧以上</li>
+</ul>
+<span id="more"></span>
+<h3 id="关键帧插值"><a href="#关键帧插值" class="headerlink" title="关键帧插值"></a>关键帧插值</h3><p>关键帧：即人物动作发生转变的一帧动画</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011225948407.png" alt="image-20241011225948407" style="zoom:67%;"></p>
+<p>关键帧插值一般使用插值的方法来进行补帧，将每一个关键帧当作参数值的向量</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230045418.png" alt="image-20241011230045418" style="zoom: 67%;"></p>
+<p>但是线性插值的效果并不够好，可以用平滑可控插值的回归样条</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230236336.png" alt="image-20241011230236336" style="zoom:50%;"></p>
+<h3 id="物理仿真"><a href="#物理仿真" class="headerlink" title="物理仿真"></a>物理仿真</h3><p>根据牛顿第二定律，使用数值模拟生成物体的运动</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230337470.png" alt="image-20241011230337470" style="zoom:50%;"></p>
+<h4 id="质点弹簧系统"><a href="#质点弹簧系统" class="headerlink" title="质点弹簧系统"></a>质点弹簧系统</h4><p>从理想化弹簧开始，没有长度，作用力会导致位移</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230459410.png" alt="image-20241011230459410" style="zoom:67%;"></p>
+<p>加入弹簧原长对振子的影响</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230541023.png" alt="image-20241011230541023" style="zoom:67%;"></p>
+<p>继续加入能量衰减的部分</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230633233.png" alt="image-20241011230633233"></p>
+<p>再加入内部阻尼模拟</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230704348.png" alt="image-20241011230704348" style="zoom:67%;"></p>
+<p>通过弹簧之间结构的连接可以决定一个图形的行为</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230913702.png" alt="image-20241011230913702" style="zoom: 50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011230946984.png" alt="image-20241011230946984" style="zoom:67%;"></p>
+<p>用上图的方式来模拟布料，但是无法正确表示切变的影响，会使原来的形状不在同一个平面上，进行改进</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231053308.png" alt="image-20241011231053308" style="zoom:67%;"></p>
+<p>还可以采用一种有限元方法，用来做汽车碰撞，主要思想是力与力之间的传导</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231221334.png" alt="image-20241011231221334" style="zoom:50%;"></p>
+<h4 id="粒子系统"><a href="#粒子系统" class="headerlink" title="粒子系统"></a>粒子系统</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231400155.png" alt="image-20241011231400155" style="zoom:50%;"></p>
+<p>主要思想：</p>
+<ul>
+<li>将动态的系统建模为大量粒子的集合</li>
+<li>每个粒子的运动都是由一组物理力定义的</li>
+<li>具备可扩展性，粒子越少，速度越快；粒子越多，速度越慢</li>
+</ul>
+<p>步骤：</p>
+<ul>
+<li>创建新的粒子</li>
+<li>计算每个例子的力</li>
+<li>更新每个粒子的位置和速度</li>
+<li>移除死掉的粒子</li>
+<li>渲染粒子</li>
+</ul>
+<p>粒子系统的作用力：</p>
+<ul>
+<li>引力和斥力：万有引力，电磁力，弹力，推进力</li>
+<li>阻力：摩擦力，空气阻力，粘滞力</li>
+<li>碰撞：与墙壁，容器，固定的物体发生碰撞</li>
+</ul>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011231852332.png" alt="image-20241011231852332" style="zoom:50%;"></p>
+<p>模拟动物集群</p>
+<ul>
+<li>将这些动物建模成一个粒子</li>
+<li>每个粒子只受简单的力</li>
+<li>使用数值方式模拟大粒子系统的演化</li>
+</ul>
+<p>根据这些粒子的行为模式可以分为三类：</p>
+<ul>
+<li>attraction：融入周围的其他粒子</li>
+<li>repulsion：相互排斥</li>
+<li>alignment：考虑运动的平均方向</li>
+</ul>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232150880.png" alt="image-20241011232150880" style="zoom:67%;"></p>
+<h2 id="运动学"><a href="#运动学" class="headerlink" title="运动学"></a>运动学</h2><p>模拟生物运动的方式</p>
+<h3 id="正运动学"><a href="#正运动学" class="headerlink" title="正运动学"></a>正运动学</h3><p>通过各种关节骨骼的运动算出各部分的摆放位置</p>
+<h4 id="关节骨骼系统"><a href="#关节骨骼系统" class="headerlink" title="关节骨骼系统"></a>关节骨骼系统</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232602751.png" alt="image-20241011232602751" style="zoom:50%;"></p>
+<p>通过简单的形体来描述一种拓扑结构与关节间的关系，本身会形成一种良好的树形结构，便于加速</p>
+<h4 id="旋转类型"><a href="#旋转类型" class="headerlink" title="旋转类型"></a>旋转类型</h4><p>有三种旋转类型</p>
+<p>Pin：在平面内旋转</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232750313.png" alt="image-20241011232750313"></p>
+<p>Ball：可以旋转到不同平面</p>
+<p>Prismatic：拉长</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232836117.png" alt="image-20241011232836117" style="zoom:150%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011232910625.png" alt="image-20241011232910625" style="zoom:67%;"></p>
+<h3 id="逆向运动学"><a href="#逆向运动学" class="headerlink" title="逆向运动学"></a>逆向运动学</h3><p>考虑正向运动学的一些缺点：动画难以用物理的方式实现，不便于动画师的制作</p>
+<p>因此考虑逆向运动学：知道末端的位置后计算出关节和骨骼应该如何摆放</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233041887.png" alt="image-20241011233041887" style="zoom: 67%;"></p>
+<p>但是逆向运动学的解不唯一，且解有可能不存在</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233134365.png" alt="image-20241011233134365" style="zoom:50%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233145905.png" alt="image-20241011233145905" style="zoom:50%;"></p>
+<p>一些解决方案：</p>
+<ul>
+<li>选择一个初始构型</li>
+<li>定义一个误差度量（如：目标与当前位置之间距离的平方）</li>
+<li>计算误差梯度作为构型的函数</li>
+<li>应用梯度下降法</li>
+</ul>
+<h3 id="绑定"><a href="#绑定" class="headerlink" title="绑定"></a>绑定</h3><p>对物体表面的各个点进行建模方面的绑定，允许更快速直观地修改姿势，变形和表情</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233512148.png" alt="image-20241011233512148" style="zoom:50%;"></p>
+<h3 id="形状混合"><a href="#形状混合" class="headerlink" title="形状混合"></a>形状混合</h3><p>直接在曲面之间进行插值</p>
+<p>简单的方案：取顶点位置的线性组合，样条用于控制随着时间的推移权重的选择</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233654939.png" alt="image-20241011233654939" style="zoom: 50%;"></p>
+<h3 id="动作捕捉"><a href="#动作捕捉" class="headerlink" title="动作捕捉"></a>动作捕捉</h3><p>直接通过设备对真人的动作进行采样</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233748542.png" alt="image-20241011233748542" style="zoom:50%;"></p>
+<h2 id="动画制作管线"><a href="#动画制作管线" class="headerlink" title="动画制作管线"></a>动画制作管线</h2><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011233835672.png" alt="image-20241011233835672" style="zoom:50%;"></p>
+<h2 id="单个粒子模拟"><a href="#单个粒子模拟" class="headerlink" title="单个粒子模拟"></a>单个粒子模拟</h2><p>研究一个粒子的运动然后泛化到大多数粒子</p>
+<h3 id="单个粒子的运动"><a href="#单个粒子的运动" class="headerlink" title="单个粒子的运动"></a>单个粒子的运动</h3><p>认为粒子的运动由速度场决定，这个速度场是一个关于位置和时间的函数</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234011995.png" alt="image-20241011234011995" style="zoom:50%;"></p>
+<p>计算粒子的位置需要解一个一阶的常微分方程</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234102170.png" alt="image-20241011234102170" style="zoom:67%;"></p>
+<h3 id="欧拉方法"><a href="#欧拉方法" class="headerlink" title="欧拉方法"></a>欧拉方法</h3><p>欧拉方法是一种简单的迭代方法用于求解给定初始位置和速度场的点经过时间t后所处的位置</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234235810.png" alt="image-20241011234235810" style="zoom:67%;"></p>
+<p>等式右边所用到的都是上一帧的参数，左侧是计算得到的下一帧的值</p>
+<p>但是使用欧拉方法不太稳定，会产生较大的误差</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234355452.png" alt="image-20241011234355452" style="zoom:50%;"></p>
+<p>并且欧拉方法不稳定，不能始终沿着指定的轨迹运动</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234449588.png" alt="image-20241011234449588" style="zoom: 67%;"></p>
+<h3 id="克服不稳定性的方法"><a href="#克服不稳定性的方法" class="headerlink" title="克服不稳定性的方法"></a>克服不稳定性的方法</h3><p>误差可以通过减小<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.025ex;" xmlns="http://www.w3.org/2000/svg" width="2.701ex" height="1.645ex" role="img" focusable="false" viewBox="0 -716 1194 727"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="394" d="M51 0Q46 4 46 7Q46 9 215 357T388 709Q391 716 416 716Q439 716 444 709Q447 705 616 357T786 7Q786 4 781 0H51ZM507 344L384 596L137 92L383 91H630Q630 93 507 344Z"></path></g><g data-mml-node="mi" transform="translate(833,0)"><path data-c="1D461" d="M26 385Q19 392 19 395Q19 399 22 411T27 425Q29 430 36 430T87 431H140L159 511Q162 522 166 540T173 566T179 586T187 603T197 615T211 624T229 626Q247 625 254 615T261 596Q261 589 252 549T232 470L222 433Q222 431 272 431H323Q330 424 330 420Q330 398 317 385H210L174 240Q135 80 135 68Q135 26 162 26Q197 26 230 60T283 144Q285 150 288 151T303 153H307Q322 153 322 145Q322 142 319 133Q314 117 301 95T267 48T216 6T155 -11Q125 -11 98 4T59 56Q57 64 57 83V101L92 241Q127 382 128 383Q128 385 77 385H26Z"></path></g></g></g></svg></mjx-container>的值来减小，但是稳定性是求解的关键</p>
+<h4 id="中点法"><a href="#中点法" class="headerlink" title="中点法"></a>中点法</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234650594.png" alt="image-20241011234650594" style="zoom:67%;"></p>
+<ul>
+<li>使用欧拉方法计算，到达点A</li>
+<li>使用欧拉方法计算起始点到A点的中点B的方向</li>
+<li>从起始点向这个方向走到C</li>
+</ul>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234811432.png" alt="image-20241011234811432" style="zoom:67%;"></p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234821947.png" alt="image-20241011234821947" style="zoom:50%;"></p>
+<h4 id="自适应步长法"><a href="#自适应步长法" class="headerlink" title="自适应步长法"></a>自适应步长法</h4><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011234858413.png" alt="image-20241011234858413" style="zoom:67%;"></p>
+<ul>
+<li>使用步长为T的欧拉方法计算到达<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.339ex;" xmlns="http://www.w3.org/2000/svg" width="2.608ex" height="1.339ex" role="img" focusable="false" viewBox="0 -442 1152.8 592"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="mi" transform="translate(605,-150) scale(0.707)"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g></g></g></g></svg></mjx-container></li>
+<li>再次用一半的步长计算得到<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.8ex;" xmlns="http://www.w3.org/2000/svg" width="4.208ex" height="1.8ex" role="img" focusable="false" viewBox="0 -442 1859.9 795.5"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="msub"><g data-mml-node="mi"><path data-c="1D465" d="M52 289Q59 331 106 386T222 442Q257 442 286 424T329 379Q371 442 430 442Q467 442 494 420T522 361Q522 332 508 314T481 292T458 288Q439 288 427 299T415 328Q415 374 465 391Q454 404 425 404Q412 404 406 402Q368 386 350 336Q290 115 290 78Q290 50 306 38T341 26Q378 26 414 59T463 140Q466 150 469 151T485 153H489Q504 153 504 145Q504 144 502 134Q486 77 440 33T333 -11Q263 -11 227 52Q186 -10 133 -10H127Q78 -10 57 16T35 71Q35 103 54 123T99 143Q142 143 142 101Q142 81 130 66T107 46T94 41L91 40Q91 39 97 36T113 29T132 26Q168 26 194 71Q203 87 217 139T245 247T261 313Q266 340 266 352Q266 380 251 392T217 404Q177 404 142 372T93 290Q91 281 88 280T72 278H58Q52 284 52 289Z"></path></g><g data-mml-node="TeXAtom" transform="translate(605,-176.7) scale(0.707)" data-mjx-texclass="ORD"><g data-mml-node="mi"><path data-c="1D447" d="M40 437Q21 437 21 445Q21 450 37 501T71 602L88 651Q93 669 101 677H569H659Q691 677 697 676T704 667Q704 661 687 553T668 444Q668 437 649 437Q640 437 637 437T631 442L629 445Q629 451 635 490T641 551Q641 586 628 604T573 629Q568 630 515 631Q469 631 457 630T439 622Q438 621 368 343T298 60Q298 48 386 46Q418 46 427 45T436 36Q436 31 433 22Q429 4 424 1L422 0Q419 0 415 0Q410 0 363 1T228 2Q99 2 64 0H49Q43 6 43 9T45 27Q49 40 55 46H83H94Q174 46 189 55Q190 56 191 56Q196 59 201 76T241 233Q258 301 269 344Q339 619 339 625Q339 630 310 630H279Q212 630 191 624Q146 614 121 583T67 467Q60 445 57 441T43 437H40Z"></path></g><g data-mml-node="TeXAtom" data-mjx-texclass="ORD" transform="translate(704,0)"><g data-mml-node="mo"><path data-c="2F" d="M423 750Q432 750 438 744T444 730Q444 725 271 248T92 -240Q85 -250 75 -250Q68 -250 62 -245T56 -231Q56 -221 230 257T407 740Q411 750 423 750Z"></path></g></g><g data-mml-node="mn" transform="translate(1204,0)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g></g></g></g></svg></mjx-container></li>
+<li>比较误差，选取对应所需要的步长</li>
+<li>重复上述步骤</li>
+</ul>
+<h4 id="隐式欧拉方法"><a href="#隐式欧拉方法" class="headerlink" title="隐式欧拉方法"></a>隐式欧拉方法</h4><p>也称为后向欧拉方法，通过后一帧的参数来计算当前帧的位置</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011235148891.png" alt="image-20241011235148891" style="zoom:67%;"></p>
+<p>但是这个方程是非线性的，可以采用Runge-Kutta Families（龙格-库塔法）方法进行计算</p>
+<p>最常用的就是RK4，四阶的Runge-Kutta法</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241011235451971.png" alt="image-20241011235451971" style="zoom: 67%;"></p>
+<p>量化稳定性的方法：</p>
+<ul>
+<li>使用局部截断误差/总截断累计误差来研究稳定性</li>
+<li>研究误差的阶</li>
+<li>隐式欧拉方法的阶数为1，局部阶段误差为<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="5.777ex" height="2.452ex" role="img" focusable="false" viewBox="0 -833.9 2553.6 1083.9"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="msup" transform="translate(1152,0)"><g data-mml-node="mi"><path data-c="210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"></path></g><g data-mml-node="mn" transform="translate(609,363) scale(0.707)"><path data-c="32" d="M109 429Q82 429 66 447T50 491Q50 562 103 614T235 666Q326 666 387 610T449 465Q449 422 429 383T381 315T301 241Q265 210 201 149L142 93L218 92Q375 92 385 97Q392 99 409 186V189H449V186Q448 183 436 95T421 3V0H50V19V31Q50 38 56 46T86 81Q115 113 136 137Q145 147 170 174T204 211T233 244T261 278T284 308T305 340T320 369T333 401T340 431T343 464Q343 527 309 573T212 619Q179 619 154 602T119 569T109 550Q109 549 114 549Q132 549 151 535T170 489Q170 464 154 447T109 429Z"></path></g></g><g data-mml-node="mo" transform="translate(2164.6,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container>，全局截断误差为<mjx-container class="MathJax" jax="SVG"><svg style="vertical-align: -0.566ex;" xmlns="http://www.w3.org/2000/svg" width="4.79ex" height="2.262ex" role="img" focusable="false" viewBox="0 -750 2117 1000"><g stroke="currentColor" fill="currentColor" stroke-width="0" transform="scale(1,-1)"><g data-mml-node="math"><g data-mml-node="mi"><path data-c="1D442" d="M740 435Q740 320 676 213T511 42T304 -22Q207 -22 138 35T51 201Q50 209 50 244Q50 346 98 438T227 601Q351 704 476 704Q514 704 524 703Q621 689 680 617T740 435ZM637 476Q637 565 591 615T476 665Q396 665 322 605Q242 542 200 428T157 216Q157 126 200 73T314 19Q404 19 485 98T608 313Q637 408 637 476Z"></path></g><g data-mml-node="mo" transform="translate(763,0)"><path data-c="28" d="M94 250Q94 319 104 381T127 488T164 576T202 643T244 695T277 729T302 750H315H319Q333 750 333 741Q333 738 316 720T275 667T226 581T184 443T167 250T184 58T225 -81T274 -167T316 -220T333 -241Q333 -250 318 -250H315H302L274 -226Q180 -141 137 -14T94 250Z"></path></g><g data-mml-node="mi" transform="translate(1152,0)"><path data-c="210E" d="M137 683Q138 683 209 688T282 694Q294 694 294 685Q294 674 258 534Q220 386 220 383Q220 381 227 388Q288 442 357 442Q411 442 444 415T478 336Q478 285 440 178T402 50Q403 36 407 31T422 26Q450 26 474 56T513 138Q516 149 519 151T535 153Q555 153 555 145Q555 144 551 130Q535 71 500 33Q466 -10 419 -10H414Q367 -10 346 17T325 74Q325 90 361 192T398 345Q398 404 354 404H349Q266 404 205 306L198 293L164 158Q132 28 127 16Q114 -11 83 -11Q69 -11 59 -2T48 16Q48 30 121 320L195 616Q195 629 188 632T149 637H128Q122 643 122 645T124 664Q129 683 137 683Z"></path></g><g data-mml-node="mo" transform="translate(1728,0)"><path data-c="29" d="M60 749L64 750Q69 750 74 750H86L114 726Q208 641 251 514T294 250Q294 182 284 119T261 12T224 -76T186 -143T145 -194T113 -227T90 -246Q87 -249 86 -250H74Q66 -250 63 -250T58 -247T55 -238Q56 -237 66 -225Q221 -64 221 250T66 725Q56 737 55 738Q55 746 60 749Z"></path></g></g></g></svg></mjx-container></li>
+</ul>
+<h4 id="基于位置-韦尔莱积分法"><a href="#基于位置-韦尔莱积分法" class="headerlink" title="基于位置/韦尔莱积分法"></a>基于位置/韦尔莱积分法</h4><p>一种不基于物理的方法，通过调整物体的位置使得物体满足某种性质</p>
+<ul>
+<li>在修改欧拉前步之后，约束粒子的位置以防止不稳定的现象</li>
+<li>使用约束位置计算速度</li>
+<li>这两种思想都会耗散能量，使其具有稳定性</li>
+</ul>
+<p>快速，简单但不满足能量守恒</p>
+<h2 id="刚体模拟"><a href="#刚体模拟" class="headerlink" title="刚体模拟"></a>刚体模拟</h2><p>刚体模拟与模拟单个粒子相似，只需要考虑一些属性</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000517661.png" alt="image-20241012000517661" style="zoom:67%;"></p>
+<h2 id="流体模拟"><a href="#流体模拟" class="headerlink" title="流体模拟"></a>流体模拟</h2><p>流体比刚体更为复杂一点</p>
+<h3 id="基于位置的模拟"><a href="#基于位置的模拟" class="headerlink" title="基于位置的模拟"></a>基于位置的模拟</h3><p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000721290.png" alt="image-20241012000721290"></p>
+<p>可以用到上述提到的基于位置的模拟方法：</p>
+<ul>
+<li>认为水由刚体小球组成</li>
+<li>认为水是不可压缩的</li>
+<li>只要某处的密度发生改变，通过粒子的位置纠正</li>
+<li>需要知道任何位置的密度梯度</li>
+<li>使用梯度下降法更新</li>
+</ul>
+<h3 id="质点法与网格法"><a href="#质点法与网格法" class="headerlink" title="质点法与网格法"></a>质点法与网格法</h3><p>质点法：跟踪同一个质点</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012000931992.png" alt="image-20241012000931992"></p>
+<p>网格法：观察同一个位置不同时间的图像</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012001010607.png" alt="image-20241012001010607"></p>
+<h3 id="物质点法（MPM，Material-Point-Method）"><a href="#物质点法（MPM，Material-Point-Method）" class="headerlink" title="物质点法（MPM，Material Point Method）"></a>物质点法（MPM，Material Point Method）</h3><p>一种结合质点法与网格法的方法</p>
+<p><img src="https://vampire-1304919510.cos.ap-nanjing.myqcloud.com/image-20241012001146468.png" alt="image-20241012001146468" style="zoom:67%;"></p>
+<ul>
+<li>认为粒子带有材质属性</li>
+<li>使用网格来做数值积分</li>
+<li>粒子将属性传递给网格，网格执行更新</li>
+<li>插值回粒子</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/" rel="tag"># 学习笔记</a>
+              <a href="/tags/%E8%AE%A1%E7%AE%97%E6%9C%BA%E5%9B%BE%E5%BD%A2%E5%AD%A6/" rel="tag"># 计算机图形学</a>
+              <a href="/tags/GAMES101/" rel="tag"># GAMES101</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2024/10/11/Lecture11_%E5%85%89%E5%9C%BA%E4%B8%8E%E9%A2%9C%E8%89%B2%E7%A9%BA%E9%97%B4/" rel="prev" title="Lecture11：光场与颜色空间">
+      <i class="fa fa-chevron-left"></i> Lecture11：光场与颜色空间
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E7%94%BB"><span class="nav-number">1.</span> <span class="nav-text">动画</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%B3%E9%94%AE%E5%B8%A7%E6%8F%92%E5%80%BC"><span class="nav-number">1.1.</span> <span class="nav-text">关键帧插值</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E7%90%86%E4%BB%BF%E7%9C%9F"><span class="nav-number">1.2.</span> <span class="nav-text">物理仿真</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%B4%A8%E7%82%B9%E5%BC%B9%E7%B0%A7%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.2.1.</span> <span class="nav-text">质点弹簧系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B2%92%E5%AD%90%E7%B3%BB%E7%BB%9F"><span class="nav-number">1.2.2.</span> <span class="nav-text">粒子系统</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%BF%90%E5%8A%A8%E5%AD%A6"><span class="nav-number">2.</span> <span class="nav-text">运动学</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AD%A3%E8%BF%90%E5%8A%A8%E5%AD%A6"><span class="nav-number">2.1.</span> <span class="nav-text">正运动学</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%85%B3%E8%8A%82%E9%AA%A8%E9%AA%BC%E7%B3%BB%E7%BB%9F"><span class="nav-number">2.1.1.</span> <span class="nav-text">关节骨骼系统</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%97%8B%E8%BD%AC%E7%B1%BB%E5%9E%8B"><span class="nav-number">2.1.2.</span> <span class="nav-text">旋转类型</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%86%E5%90%91%E8%BF%90%E5%8A%A8%E5%AD%A6"><span class="nav-number">2.2.</span> <span class="nav-text">逆向运动学</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%91%E5%AE%9A"><span class="nav-number">2.3.</span> <span class="nav-text">绑定</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BD%A2%E7%8A%B6%E6%B7%B7%E5%90%88"><span class="nav-number">2.4.</span> <span class="nav-text">形状混合</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A8%E4%BD%9C%E6%8D%95%E6%8D%89"><span class="nav-number">2.5.</span> <span class="nav-text">动作捕捉</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8A%A8%E7%94%BB%E5%88%B6%E4%BD%9C%E7%AE%A1%E7%BA%BF"><span class="nav-number">3.</span> <span class="nav-text">动画制作管线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8D%95%E4%B8%AA%E7%B2%92%E5%AD%90%E6%A8%A1%E6%8B%9F"><span class="nav-number">4.</span> <span class="nav-text">单个粒子模拟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8D%95%E4%B8%AA%E7%B2%92%E5%AD%90%E7%9A%84%E8%BF%90%E5%8A%A8"><span class="nav-number">4.1.</span> <span class="nav-text">单个粒子的运动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AC%A7%E6%8B%89%E6%96%B9%E6%B3%95"><span class="nav-number">4.2.</span> <span class="nav-text">欧拉方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%85%8B%E6%9C%8D%E4%B8%8D%E7%A8%B3%E5%AE%9A%E6%80%A7%E7%9A%84%E6%96%B9%E6%B3%95"><span class="nav-number">4.3.</span> <span class="nav-text">克服不稳定性的方法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%AD%E7%82%B9%E6%B3%95"><span class="nav-number">4.3.1.</span> <span class="nav-text">中点法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%87%AA%E9%80%82%E5%BA%94%E6%AD%A5%E9%95%BF%E6%B3%95"><span class="nav-number">4.3.2.</span> <span class="nav-text">自适应步长法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E9%9A%90%E5%BC%8F%E6%AC%A7%E6%8B%89%E6%96%B9%E6%B3%95"><span class="nav-number">4.3.3.</span> <span class="nav-text">隐式欧拉方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E4%BD%8D%E7%BD%AE-%E9%9F%A6%E5%B0%94%E8%8E%B1%E7%A7%AF%E5%88%86%E6%B3%95"><span class="nav-number">4.3.4.</span> <span class="nav-text">基于位置&#x2F;韦尔莱积分法</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%88%9A%E4%BD%93%E6%A8%A1%E6%8B%9F"><span class="nav-number">5.</span> <span class="nav-text">刚体模拟</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B5%81%E4%BD%93%E6%A8%A1%E6%8B%9F"><span class="nav-number">6.</span> <span class="nav-text">流体模拟</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E4%BA%8E%E4%BD%8D%E7%BD%AE%E7%9A%84%E6%A8%A1%E6%8B%9F"><span class="nav-number">6.1.</span> <span class="nav-text">基于位置的模拟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%A8%E7%82%B9%E6%B3%95%E4%B8%8E%E7%BD%91%E6%A0%BC%E6%B3%95"><span class="nav-number">6.2.</span> <span class="nav-text">质点法与网格法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%89%A9%E8%B4%A8%E7%82%B9%E6%B3%95%EF%BC%88MPM%EF%BC%8CMaterial-Point-Method%EF%BC%89"><span class="nav-number">6.3.</span> <span class="nav-text">物质点法（MPM，Material Point Method）</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Vampire</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">14</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">3</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2024</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Vampire</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+      
+
+<script>
+  if (typeof MathJax === 'undefined') {
+    window.MathJax = {
+      loader: {
+          load: ['[tex]/mhchem'],
+        source: {
+          '[tex]/amsCd': '[tex]/amscd',
+          '[tex]/AMScd': '[tex]/amscd'
+        }
+      },
+      tex: {
+        inlineMath: {'[+]': [['$', '$']]},
+          packages: {'[+]': ['mhchem']},
+        tags: 'ams'
+      },
+      options: {
+        renderActions: {
+          findScript: [10, doc => {
+            document.querySelectorAll('script[type^="math/tex"]').forEach(node => {
+              const display = !!node.type.match(/; *mode=display/);
+              const math = new doc.options.MathItem(node.textContent, doc.inputJax[0], display);
+              const text = document.createTextNode('');
+              node.parentNode.replaceChild(text, node);
+              math.start = {node: text, delim: '', n: 0};
+              math.end = {node: text, delim: '', n: 0};
+              doc.math.push(math);
+            });
+          }, '', false],
+          insertedScript: [200, () => {
+            document.querySelectorAll('mjx-container').forEach(node => {
+              let target = node.parentNode;
+              if (target.nodeName.toLowerCase() === 'li') {
+                target.parentNode.classList.add('has-jax');
+              }
+            });
+          }, '', false]
+        }
+      }
+    };
+    (function () {
+      var script = document.createElement('script');
+      script.src = '//cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js';
+      script.defer = true;
+      document.head.appendChild(script);
+    })();
+  } else {
+    MathJax.startup.document.state(0);
+    MathJax.texReset();
+    MathJax.typeset();
+  }
+</script>
+
+    
+
+  
+
+</body>
+</html>
